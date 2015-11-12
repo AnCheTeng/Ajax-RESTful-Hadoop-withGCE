@@ -157,12 +157,10 @@ app.get('/list', function(request, response) {
 });
 
 app.get('/done', function(request, response) {
-  Task.find({
-    state: "done"
-  }, function(err, done_list) {
-    response.send(done_list);
+  Task.find({state: "done"}).exec(function(err, done_list) {
     console.log(done_list);
-  })
+    response.send(done_list);
+  });
 });
 
 //================================Here is testing field================================
