@@ -1,11 +1,48 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var exec = require('child_process').exec;
 
 var Task = require('./Task');
 
 mongoose.connect('mongodb://localhost/hadoop-task');
 var app = express();
+
+function runHadoop(analyzed_filename) {
+  console.log("Let's start!");
+  console.log("Move file to hdfs");
+  exec("hdfs dfs -copyFromLocal " + analyzed_filename + " CCTslog/log_file", function() {
+    console.log("Remove old output directory");
+    exec("hdfs dfs -rm -r -f CCTslog_outdir", function() {
+      console.log("Run bash log_analysis.sh");
+      exec("bash log_analysis.sh", function() {
+        exec("hdfs dfs -text CCTslog_outdir/part-00000", function(error, stdout, stderr) {
+          console.log("Analysis of " + analyzed_filename + " is finished!");
+          Task.findOne({
+            file: analyzed_filename
+          }, function(err, hadooptask) {
+            hadooptask.result = stdout;
+            hadooptask.save();
+            Task.findOne({
+              _id: hadooptask.next_task
+            }, function(err, nextTask) {
+              hadooptask.state = "done";
+              if (nextTask != null) {
+                nextTask.state = "running";
+                hadooptask.save();
+                nextTask.save();
+                runHadoop(nextTask.file);
+              } else {
+                console.log("This is the end of queue!");
+                hadooptask.save();
+              }
+            });
+          })
+        });
+      });
+    });
+  });
+}
 
 
 
@@ -63,6 +100,7 @@ app.route('/task/:filename')
         }).exec(function(err, task) {
           console.log('\nReturn: ' + task);
           response.send(task);
+          runHadoop(task);
         });
       } else {
 
@@ -155,10 +193,15 @@ app.get('/add/:filename', function(request, response) {
 
       Task.findOne({
         file: request.params.filename
-      }).exec(function(err, task) {
+      }, function(err, task) {
         console.log('\nReturn: ' + task);
         response.send(task);
+        response.end();
+ 	//runHadoop(task);
+        //response.end();
+        runHadoop(task.file);
       });
+
     } else {
 
       var newtask = new Task({
