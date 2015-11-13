@@ -50,7 +50,8 @@ Task.findOne({state: "SUPERNODE"}, function(err, supernode){
   if(supernode==null){
     var super_task = new Task({
       file: "SUPERNODE",
-      state: "SUPERNODE"
+      state: "SUPERNODE",
+      created_time: new Date().getTime()
     });
     super_task.save();
   }
@@ -149,7 +150,7 @@ app.route('/task/:filename')
   });
 
 app.get('/list', function(request, response) {
-  Task.find({state:{$ne: "SUPERNODE"}}).exec(function(err, tasks) {
+  Task.find({state:{$ne: "SUPERNODE"}},{result: false}).exec(function(err, tasks) {
     response.send(tasks);
     console.log(tasks);
   });
@@ -183,7 +184,8 @@ app.get('/add/:filename', function(request, response) {
       });
 
       Task.findOne({
-        next_task: null
+        next_task: null,
+  	created_time: {$lt: newtask.created_time}
       }).exec(function(err, last_task) {
         last_task.next_task = newtask._id;
         last_task.save();
