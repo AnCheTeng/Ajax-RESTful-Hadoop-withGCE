@@ -10,17 +10,22 @@ mongoose.connect('mongodb://localhost/hadoop-task');
 // Execute Hadoop-Apache-Log-Analysis shell command ewith Node.js
 function runHadoop(filename) {
   console.log("===========================Start to analyze " + filename + " !.===========================");
+  var task_start_time = new Date().getTime();
   // Use chaining callback with exec()
   // Todo: Maybe we can use require('child-process-promise').exec instead of require('child_process').exec
   exec("hdfs dfs -copyFromLocal " + filename + " CCTslog/log_file", function() {
     exec("hdfs dfs -rm -r -f CCTslog_outdir", function() {
       exec("bash log_analysis.sh", function() {
         exec("hdfs dfs -text CCTslog_outdir/part-00000", function(error, stdout, stderr) {
+          var task_end_time = new Date().getTime();
           console.log("===========================Analysis of " + filename + " is finished!===========================");
           Task.findOne({
             file: filename
           }, function(err, hadooptask) {
             hadooptask.result = stdout;
+            hadooptask.start_time = task_start_time;
+            hadooptask.end_time = task_end_time;
+            hadooptask.process_time = (task_end_time-task_start_time)/1000 + " second";
             Task.findOne({
               _id: hadooptask.next_task
             }, function(err, nextTask) {
@@ -75,69 +80,45 @@ app.route('/task/:filename')
   })
   //===========================POST /task/:filename===========================
   .post(function(request, response) {
+    // Check is there any running task first
     Task.find({
       state: "running"
     }, function(err, running_task) {
 
+      var task_state = "";
+      // Check the state of new task
       if (running_task.length == 0) {
-
-        var newtask = new Task({
-          file: request.params.filename,
-          state: "running",
-          created_time: new Date().getTime()
-        });
-
-        newtask.save(function(err) {
-          console.log("Save " + newtask.file + " successfully!");
-        });
-
-        Task.findOne({
-          next_task: null,
-          created_time: {
-            $lt: newtask.created_time
-          }
-        }).exec(function(err, last_task) {
-          last_task.next_task = newtask._id;
-          last_task.save();
-        });
-
-        Task.findOne({
-          file: request.params.filename
-        }, function(err, task) {
-          console.log('\nReturn: ' + task);
-          response.send(task);
-          response.end();
-          //runHadoop(task);
-          //response.end();
-          runHadoop(task.file);
-        });
-
+        newtask_state = "running";
       } else {
-
-        var newtask = new Task({
-          file: request.params.filename,
-          state: "waiting",
-          created_time: new Date().getTime()
-        });
-
-        newtask.save(function(err) {
-          console.log("Save " + newtask.file + " successfully!");
-        });
-
-        Task.findOne({
-          next_task: null
-        }).exec(function(err, last_task) {
-          last_task.next_task = newtask._id;
-          last_task.save();
-        });
-
-        Task.findOne({
-          file: request.params.filename
-        }).exec(function(err, task) {
-          console.log('Return: ' + task);
-          response.send(task);
-        });
-
+        newtask_state = "waiting";
+      }
+      // Create a new task document
+      var newtask = new Task({
+        file: request.params.filename,
+        state: newtask_state,
+        created_time: new Date().getTime()
+      });
+      // Save the new task
+      newtask.save(function(err) {
+        console.log("Save " + newtask.file + " successfully!");
+      });
+      // Find the end-node of the queue and set its next_task to newtask._id
+      Task.findOne({
+        next_task: null,
+        created_time: {
+          $lt: newtask.created_time
+        }
+      }).exec(function(err, last_task) {
+        last_task.next_task = newtask._id;
+        last_task.save();
+      });
+      // Return POST result and run the service
+      //console.log('\nReturn: ' + newtask);
+      response.send(newtask);
+      response.end();
+      // Run Hadoop analysis
+      if (newtask_state = "running") {
+        runHadoop(newtask.file);
       }
     });
   })
@@ -154,7 +135,7 @@ app.route('/task/:filename')
           prev_node.save();
         }
       });
-      console.log(deleted_task + '\nIs deleted.');
+      //console.log(deleted_task + '\nIs deleted.');
       response.send("Now delete the file " + request.params.filename + "\n" + deleted_task);
     });
   });
@@ -169,7 +150,7 @@ app.get('/list', function(request, response) {
     result: false
   }).exec(function(err, tasks) {
     response.send(tasks);
-    console.log(tasks);
+    //console.log(tasks);
   });
 
 });
@@ -178,8 +159,10 @@ app.get('/list', function(request, response) {
 app.get('/done', function(request, response) {
   Task.find({
     state: "done"
+  }, {
+    result: false
   }).exec(function(err, done_list) {
-    console.log(done_list);
+    //console.log(done_list);
     response.send(done_list);
   });
 });
@@ -221,7 +204,7 @@ app.get('/add/:filename', function(request, response) {
       last_task.save();
     });
     // Return POST result and run the service
-    console.log('\nReturn: ' + newtask);
+    //console.log('\nReturn: ' + newtask);
     response.send(newtask);
     response.end();
     // Run Hadoop analysis
@@ -245,7 +228,7 @@ app.get('/remove/:filename', function(request, response) {
         prev_node.save();
       }
     });
-    console.log(deleted_task + '\nIs deleted.');
+    //console.log(deleted_task + '\nIs deleted.');
     response.send("Now delete the file " + request.params.filename + "\n" + deleted_task);
   });
 });
