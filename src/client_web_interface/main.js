@@ -1,8 +1,5 @@
 $(document).ready(function(){
   $.getJSON('/list', function(result){
-    var task_row = $('<p></p>');
-    task_row.append('result');
-    $('tbody').append(task_row);
     $.each(result, function(index, task){
       var task_row = $('<tr></tr>');
       task_row.append('<td>'+task.file+'</td>');
