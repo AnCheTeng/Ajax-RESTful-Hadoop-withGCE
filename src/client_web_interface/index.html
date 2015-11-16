@@ -96,7 +96,12 @@
 
       <p class="">This is a template for a simple marketing or informational website. It includes a large callout called the hero unit and three supporting pieces of content. Use it as a starting point to create something more unique.</p>
       <p class="">
-        <a class="btn btn-primary btn-large">Upload Your Apache-Log</a>
+        <!-- <a class="btn btn-primary btn-large">Upload Your Apache-Log</a> -->
+        <form method="post" enctype="multipart/form-data" action="/upload">
+          <img src="upload_btn.jpg" id="upfile" style="cursor:pointer" />
+          <input id="fileupload" type="file" name="files[]" data-url="/upload" multiple style="display:none">
+          <!-- <input type="submit"> -->
+        </form>
       </p>
     </div>
     <!-- Example row of columns -->
@@ -170,6 +175,9 @@
   <!-- Placed at the end of the document so the pages load faster -->
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
   </script>
+  <script src="jQuery-File-Upload-9.11.2/js/vendor/jquery.ui.widget.js"></script>
+  <script src="jQuery-File-Upload-9.11.2/js/jquery.iframe-transport.js"></script>
+  <script src="jQuery-File-Upload-9.11.2/js/jquery.fileupload.js"></script>
   <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
   <script src='main.js'></script>
   <!-- <a class='btn btn-inverse btn-block' style='text-align:center;position:fixed;bottom:0;' href='http://www.boottheme.com' target='_blank'>This site was created by BootTheme.com. Create your own for FREE &raquo;</a></body> -->

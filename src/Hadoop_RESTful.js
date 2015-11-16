@@ -2,6 +2,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var exec = require('child_process').exec;
 var Task = require('./Task');
+var upload = require('jquery-file-upload-middleware');
 var Schema = mongoose.Schema;
 var app = express();
 
@@ -64,6 +65,24 @@ Task.findOne({
 console.log("===========================Server is starting===========================");
 
 app.use(express.static('client_web_interface'));
+
+upload.configure({
+    uploadDir: __dirname + '/uploads',
+    uploadUrl: '/uploads'
+});
+
+app.use('/upload', function(req, res, next){
+    upload.fileHandler({
+        uploadDir: function () {
+            return __dirname + '/uploads'
+        },
+        uploadUrl: function () {
+            return '/uploads'
+        }
+    })(req, res, next);
+});
+
+
 // Home page
 app.get('/', function(request, response) {
   console.log("This is /");
