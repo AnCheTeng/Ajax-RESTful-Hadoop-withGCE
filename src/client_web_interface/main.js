@@ -1,3 +1,7 @@
+String.prototype.replaceAll = function(s1,s2){ 
+  return this.replace(new RegExp(s1,"gm"),s2); 
+} 
+
 $(document).ready(function(){
   $.getJSON('/list', function(result){
     $.each(result, function(index, task){
@@ -9,10 +13,15 @@ $(document).ready(function(){
       $('tbody').append(task_row);
     })
   });
-  $('button').on('click', function(){
-    var fn = $(this).parent().find("td").first().data('filename');
-    $.getJSON('/task/'+filename, function(task_info){
-      $('.hadoop-task-result').text(task_info.result);
+  $('tbody').on('click', '.btn-info', function(event){
+    event.preventDefault();
+    var fn = $(this).parent().parent().children().first().data('filename');
+    $.getJSON('/task/'+fn, function(task_info){
+      var cleanup = task_info.result.replaceAll("\n", " <br /> ");
+      var timestamp = "<h4>Process Time: "+task_info.process_time+"</h3><br />"+"<h4>Result: </h3><br />";
+      cleanup = timestamp + cleanup;
+      $('.hadoop-task-result').fadeToggle();
+      $('.hadoop-task-result').html('<p>'+cleanup+'</p>').fadeToggle();
     });
   });
 })
