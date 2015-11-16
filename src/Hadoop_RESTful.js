@@ -63,6 +63,7 @@ Task.findOne({
 
 console.log("===========================Server is starting===========================");
 
+app.use(express.static('client_web_interface'));
 // Home page
 app.get('/', function(request, response) {
   console.log("This is /");
