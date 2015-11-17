@@ -31,9 +31,9 @@ $(document).ready(function() {
     event.preventDefault();
     var remove_item = $(this).parent().parent();
     var fn = remove_item.children().first().data('filename');
-    $.ajax('/task/' + fn, function(task_info) {
+    $.ajax('/task/' + fn, {
       type: 'DELETE',
-      success: function(){
+      success: function() {
         remove_item.remove();
       }
     });
