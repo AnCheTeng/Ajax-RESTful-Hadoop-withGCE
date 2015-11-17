@@ -3,7 +3,7 @@ String.prototype.replaceAll = function(s1, s2) {
 }
 
 $(document).ready(function() {
-// Function: Automatically refresh the web page when loaded
+  // Function: Automatically refresh the web page when loaded
   $.getJSON('/list', function(result) {
     $.each(result, function(index, task) {
       var task_row = $('<tr></tr>');
@@ -14,19 +14,19 @@ $(document).ready(function() {
       $('tbody').append(task_row);
     })
   });
-// Function: See result when done !
+  // Function: See result when done !
   $('tbody').on('click', '.btn-info', function(event) {
     event.preventDefault();
     var fn = $(this).parent().parent().children().first().data('filename');
     $.getJSON('/task/' + fn, function(task_info) {
       var cleanup = task_info.result.replaceAll("\n", " <br /> ");
-      var timestamp = "<h4>Process Time: " + task_info.process_time + "</h3><br />" + "<h4>Result: </h3><br />";
+      var timestamp = "<h4>File Name: " + task_info.file + "</h4><h4>Process Time: " + task_info.process_time + "</h4>" + "<h4>Result:</h4>";
       cleanup = timestamp + cleanup;
       $('.hadoop-task-result').fadeToggle();
       $('.hadoop-task-result').html('<p>' + cleanup + '</p>').fadeToggle();
     });
   });
-// Function: Delete some object !
+  // Function: Delete some object !
   $('tbody').on('click', '.btn-warning', function(event) {
     event.preventDefault();
     var remove_item = $(this).parent().parent();

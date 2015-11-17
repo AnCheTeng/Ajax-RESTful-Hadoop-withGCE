@@ -43,9 +43,10 @@
           <span class="icon-bar"></span>
 
         </a>
-        <a class="brand" href="#">Hadoop Apache-Log Analysis</a>
+        <a class="brand" href="#" value="Reload Page" onClick="window.location.reload()"><b>Hadoop Apache - Log Analysis</b></a>
         <div class="nav-collapse collapse" style="height: 0px;">
           <ul class="nav">
+	<!--
             <li class="active">
               <a href="#">Home</a>
             </li>
@@ -53,7 +54,7 @@
               <a href="#about">About</a>
             </li>
             <li>
-
+	-->
             </li>
             <li class="dropdown">
 
@@ -92,13 +93,12 @@
     <!-- Main hero unit for a primary marketing message or call to action
             -->
     <div class="hero-unit">
-      <h1>Hadoop, world!</h1>
-
-      <p class="">This is a website for a simple log-file analysis with apache web server. It includes a large callout called the hero unit and three supporting pieces of content. Use it as a starting point to create something more unique.</p>
+      <h2>Hadoop makes Log analysis can't be more simple</h2>
+      <p class="">This is a website for a log-file analysis with apache web server. Users can analyze the numbers of visiters of your website in every hour. What you need to do is to submit the log file in .txt format and the result will show up after the job is finished. Hope you enjoy this service</p>
       <p class="">
         <!-- <a class="btn btn-primary btn-large">Upload Your Apache-Log</a> -->
         <form method="post" enctype="multipart/form-data" action="/upload">
-          <img src="upload_btn.jpg" id="upfile" style="cursor:pointer" />
+          <img src="upload_btn.jpg" id="upfile" style="cursor:pointer" height="80" width="100" />
           <input id="fileupload" type="file" name="files[]" data-url="/upload" multiple style="display:none">
           <!-- <input type="submit"> -->
         </form>
@@ -106,15 +106,12 @@
     </div>
     <!-- Example row of columns -->
     <div class="row-fluid">
-
-
-
       <table class="table table-bordered  table-striped">
         <tbody>
           <tr>
             <th class="">File Name</th>
             <th class="">Status</th>
-            <th class="">Edit</th>
+            <th class="">Function</th>
           </tr>
           <!--<tr>
             <td class="">Apache-Log-2015/11/10</td>
@@ -162,7 +159,7 @@
     </div>
     <hr>
     <div class="row-fluid">
-      <h1>Result</h1>
+      <h1>Log Analysis Result</h1>
     </div>
     <footer>
 
@@ -173,8 +170,7 @@
   </div>
   <!-- /container -->
   <!-- Placed at the end of the document so the pages load faster -->
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
-  </script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script src="jQuery-File-Upload-9.11.2/js/vendor/jquery.ui.widget.js"></script>
   <script src="jQuery-File-Upload-9.11.2/js/jquery.iframe-transport.js"></script>
   <script src="jQuery-File-Upload-9.11.2/js/jquery.fileupload.js"></script>
