@@ -32,12 +32,22 @@ $(document).ready(function() {
     var file = this.files[0];
     $('#fileupload').fileupload({
       dataType: 'json',
-      success: function(){
+      success: function() {
         name = file.name;
-	console.log(name);
-	$.ajax('/task/'+name, {
-	  type: 'POST'
-	});
+        console.log(name);
+        $.ajax('/task/' + name, {
+          type: 'POST',
+          success: function() {
+            $.getJSON('/task/' + name, function(task) {
+              var task_row = $('<tr></tr>');
+              var filename = task.file;
+              task_row.append('<td data-filename=' + filename + '>' + filename + '</td>');
+              task_row.append('<td><button class="btn btn-info">' + task.state + '</button></td>');
+              task_row.append('<td><button class="btn btn-warning">Edit</button></td>');
+              $('tbody').append(task_row);
+            });
+          }
+        });
       }
     });
   });
