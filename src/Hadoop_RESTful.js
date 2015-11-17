@@ -169,7 +169,7 @@ app.get('/list', function(request, response) {
     }
   }, {
     result: false
-  }).exec(function(err, tasks) {
+  }).sort({"created_time": 1}).exec(function(err, tasks) {
     response.send(tasks);
     //console.log(tasks);
   });
@@ -256,6 +256,9 @@ app.get('/remove/:filename', function(request, response) {
 
 // This method is for testing, delete all tasks
 app.get('/delete_all', function(request, response) {
+  exec("rm -r uploads", function(){
+    exec("mkdir uploads");
+  });
   Task.find({
     state: {
       $ne: "SUPERNODE"
