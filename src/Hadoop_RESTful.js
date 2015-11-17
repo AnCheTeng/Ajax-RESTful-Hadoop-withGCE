@@ -14,38 +14,43 @@ function runHadoop(filename) {
   var task_start_time = new Date().getTime();
   // Use chaining callback with exec()
   // Todo: Maybe we can use require('child-process-promise').exec instead of require('child_process').exec
-  exec("hdfs dfs -copyFromLocal uploads/" + filename + " CCTslog/log_file", function() {
-    exec("hdfs dfs -rm -r -f CCTslog_outdir", function() {
-      exec("bash log_analysis.sh", function() {
-        exec("hdfs dfs -text CCTslog_outdir/part-00000", function(error, stdout, stderr) {
-          var task_end_time = new Date().getTime();
-          console.log("===========================Analysis of " + filename + " is finished!===========================");
-          Task.findOne({
-            file: filename
-          }, function(err, hadooptask) {
-            hadooptask.result = stdout;
-            hadooptask.start_time = task_start_time;
-            hadooptask.end_time = task_end_time;
-            hadooptask.process_time = (task_end_time-task_start_time)/1000 + " second";
-            Task.findOne({
-              _id: hadooptask.next_task
-            }, function(err, nextTask) {
-              hadooptask.state = "done";
-              if (nextTask != null) {
-                nextTask.state = "running";
-                nextTask.save();
-                hadooptask.save();
-                runHadoop(nextTask.file);
-              } else {
-                console.log("This is the end of queue!");
-                hadooptask.save();
-              }
+  exec("hdfs dfs -rm -r -f CCTslog", function() {
+    exec("hdfs dfs -mkdir CCTslog", function() {
+      exec("hdfs dfs -copyFromLocal uploads/" + filename + " CCTslog/log_file", function() {
+        exec("hdfs dfs -rm -r -f CCTslog_outdir", function() {
+          exec("bash log_analysis.sh", function() {
+            exec("hdfs dfs -text CCTslog_outdir/part-00000", function(error, stdout, stderr) {
+              var task_end_time = new Date().getTime();
+              console.log("===========================Analysis of " + filename + " is finished!===========================");
+              Task.findOne({
+                file: filename
+              }, function(err, hadooptask) {
+                hadooptask.result = stdout;
+                hadooptask.start_time = task_start_time;
+                hadooptask.end_time = task_end_time;
+                hadooptask.process_time = (task_end_time - task_start_time) / 1000 + " second";
+                Task.findOne({
+                  _id: hadooptask.next_task
+                }, function(err, nextTask) {
+                  hadooptask.state = "done";
+                  if (nextTask != null) {
+                    nextTask.state = "running";
+                    nextTask.save();
+                    hadooptask.save();
+                    runHadoop(nextTask.file);
+                  } else {
+                    console.log("This is the end of queue!");
+                    hadooptask.save();
+                  }
+                });
+              });
             });
-          })
+          });
         });
       });
     });
   });
+
 }
 
 // Create a SUPERNODE if there is no SUPERNODE
@@ -67,20 +72,20 @@ console.log("===========================Server is starting======================
 app.use(express.static('client_web_interface'));
 
 upload.configure({
-    uploadDir: __dirname + '/uploads',
-    uploadUrl: '/uploads'
+  uploadDir: __dirname + '/uploads',
+  uploadUrl: '/uploads'
 });
 
-app.use('/upload', function(req, res, next){
-    console.log("Uploading!");
-    upload.fileHandler({
-        uploadDir: function () {
-            return __dirname + '/uploads'
-        },
-        uploadUrl: function () {
-            return '/uploads'
-        }
-    })(req, res, next);
+app.use('/upload', function(req, res, next) {
+  console.log("Uploading!");
+  upload.fileHandler({
+    uploadDir: function() {
+      return __dirname + '/uploads'
+    },
+    uploadUrl: function() {
+      return '/uploads'
+    }
+  })(req, res, next);
 });
 
 
@@ -169,7 +174,9 @@ app.get('/list', function(request, response) {
     }
   }, {
     result: false
-  }).sort({"created_time": 1}).exec(function(err, tasks) {
+  }).sort({
+    "created_time": 1
+  }).exec(function(err, tasks) {
     response.send(tasks);
     //console.log(tasks);
   });
@@ -256,7 +263,7 @@ app.get('/remove/:filename', function(request, response) {
 
 // This method is for testing, delete all tasks
 app.get('/delete_all', function(request, response) {
-  exec("rm -r uploads", function(){
+  exec("rm -r uploads", function() {
     exec("mkdir uploads");
   });
   Task.find({
