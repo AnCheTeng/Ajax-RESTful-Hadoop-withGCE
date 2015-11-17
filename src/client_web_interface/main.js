@@ -29,13 +29,17 @@ $(document).ready(function() {
     $("#fileupload").trigger('click');
   });
   $('#fileupload').change(function() {
-    $('#fileupload').fileupload({
-      dataType: 'json'
-    });
     var file = this.files[0];
-    var name = file.name;
-    //Your validation
-    console.log(name);
+    $('#fileupload').fileupload({
+      dataType: 'json',
+      success: function(){
+        name = file.name;
+	console.log(name);
+	$.ajax('/task/'+name, {
+	  type: 'POST'
+	});
+      }
+    });
   });
 
 })

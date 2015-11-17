@@ -14,7 +14,7 @@ function runHadoop(filename) {
   var task_start_time = new Date().getTime();
   // Use chaining callback with exec()
   // Todo: Maybe we can use require('child-process-promise').exec instead of require('child_process').exec
-  exec("hdfs dfs -copyFromLocal " + filename + " CCTslog/log_file", function() {
+  exec("hdfs dfs -copyFromLocal uploads/" + filename + " CCTslog/log_file", function() {
     exec("hdfs dfs -rm -r -f CCTslog_outdir", function() {
       exec("bash log_analysis.sh", function() {
         exec("hdfs dfs -text CCTslog_outdir/part-00000", function(error, stdout, stderr) {
@@ -72,6 +72,7 @@ upload.configure({
 });
 
 app.use('/upload', function(req, res, next){
+    console.log("Uploading!");
     upload.fileHandler({
         uploadDir: function () {
             return __dirname + '/uploads'
