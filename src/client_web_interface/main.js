@@ -42,11 +42,10 @@ $(document).ready(function() {
   $("#upfile").click(function() {
     $("#fileupload").trigger('click');
   });
-  $('#fileupload').change(function() {
-    var file = this.files[0];
     $('#fileupload').fileupload({
       dataType: 'json',
       success: function() {
+	var file = this.files[0];
         name = file.name;
         console.log(name);
         $.ajax('/task/' + name, {
@@ -64,6 +63,5 @@ $(document).ready(function() {
         });
       }
     });
-  });
 
 })
